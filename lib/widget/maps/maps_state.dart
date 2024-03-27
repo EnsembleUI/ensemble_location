@@ -18,6 +18,7 @@ import 'package:ensemble_location/widget/maps/maps.dart';
 import 'package:ensemble_location/widget/maps/maps_overlay.dart';
 import 'package:ensemble_location/widget/maps/maps_toolbar.dart';
 import 'package:ensemble_location/widget/maps/maps_utils.dart';
+import 'package:ensemble_location/widget/maps/widget_to_marker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -35,6 +36,8 @@ abstract class MapsActionableState extends WidgetState<EnsembleMapWidget> {
 class EnsembleMapState extends MapsActionableState
     with TemplatedWidgetState, LocationCapability, MapActions {
   static const selectedMarkerZIndex = 100.0;
+  static const MAX_WIDTH = 500;
+  static const MAX_HEIGHT = 500;
 
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
@@ -418,6 +421,14 @@ class EnsembleMapState extends MapsActionableState
   Future<BitmapDescriptor?> _buildMarkerFromTemplate(
       MarkerPayload markerPayload, MarkerTemplate? template) async {
     if (template != null) {
+      // widget-to-bitmap only works on Native/Canvaskit, not HTML renderer
+      // but we simply check if Web or not.
+      if (template.widget != null && !kIsWeb) {
+        Widget widget = markerPayload.scopeManager
+            .buildWidgetFromDefinition(template.widget);
+        return widget.toBitmapDescriptor(
+            maxWidth: MAX_WIDTH, maxHeight: MAX_HEIGHT);
+      }
       if (template.source != null) {
         String? source =
             markerPayload.scopeManager.dataContext.eval(template.source!);
@@ -431,7 +442,7 @@ class EnsembleMapState extends MapsActionableState
           return markersCache[source];
         }
       }
-      // TODO: from icon/widget
+      // TODO: from icon
     }
     return null;
   }

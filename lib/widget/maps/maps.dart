@@ -113,10 +113,11 @@ class EnsembleMapWidget extends StatefulWidget
             name: name,
             latLng: latLng,
             template: MarkerTemplate.build(
-                source: markerData['marker']?['source'],
+                source: Utils.optionalString(markerData['marker']?['source']),
                 widget: markerData['marker']?['widget']),
             selectedTemplate: MarkerTemplate.build(
-                source: markerData['selectedMarker']?['source'],
+                source: Utils.optionalString(
+                    markerData['selectedMarker']?['source']),
                 widget: markerData['selectedMarker']?['widget']),
             overlayTemplate: markerData['overlayWidget'],
             onMarkerTap: EnsembleAction.fromYaml(markerData['onMarkerTap'],
@@ -256,9 +257,9 @@ class MarkerTemplate {
 
   final String? source;
   final String? icon;
-  final String? widget;
+  final dynamic widget;
 
-  static MarkerTemplate? build({String? source, String? icon, String? widget}) {
+  static MarkerTemplate? build({String? source, String? icon, dynamic widget}) {
     if (source != null || icon != null || widget != null) {
       return MarkerTemplate._(source: source, icon: icon, widget: widget);
     }

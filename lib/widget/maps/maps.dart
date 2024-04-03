@@ -113,11 +113,10 @@ class EnsembleMapWidget extends StatefulWidget
             name: name,
             latLng: latLng,
             template: MarkerTemplate.build(
-                source: Utils.optionalString(markerData['marker']?['source']),
+                image: Utils.getMap(markerData['marker']?['image']),
                 widget: markerData['marker']?['widget']),
             selectedTemplate: MarkerTemplate.build(
-                source: Utils.optionalString(
-                    markerData['selectedMarker']?['source']),
+                image: Utils.getMap(markerData['selectedMarker']?['image']),
                 widget: markerData['selectedMarker']?['widget']),
             overlayTemplate: markerData['overlayWidget'],
             onMarkerTap: EnsembleAction.fromYaml(markerData['onMarkerTap'],
@@ -253,15 +252,16 @@ class MarkerItemTemplate extends ItemTemplate {
 
 /// a marker template and selectedTemplate can take in an image, an icon, or a custom widget
 class MarkerTemplate {
-  MarkerTemplate._({this.source, this.icon, this.widget});
+  MarkerTemplate._({this.image, this.icon, this.widget});
 
-  final String? source;
+  final Map<String, dynamic>? image;
   final String? icon;
   final dynamic widget;
 
-  static MarkerTemplate? build({String? source, String? icon, dynamic widget}) {
-    if (source != null || icon != null || widget != null) {
-      return MarkerTemplate._(source: source, icon: icon, widget: widget);
+  static MarkerTemplate? build(
+      {Map<String, dynamic>? image, String? icon, dynamic widget}) {
+    if (image != null || icon != null || widget != null) {
+      return MarkerTemplate._(image: image, icon: icon, widget: widget);
     }
     return null;
   }

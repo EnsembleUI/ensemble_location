@@ -429,12 +429,20 @@ class EnsembleMapState extends MapsActionableState
         return widget.toBitmapDescriptor(
             maxWidth: MAX_WIDTH, maxHeight: MAX_HEIGHT);
       }
-      if (template.source != null) {
-        String? source =
-            markerPayload.scopeManager.dataContext.eval(template.source!);
+      if (template.image != null) {
+        String? source = Utils.optionalString(markerPayload
+            .scopeManager.dataContext
+            .eval(template.image!["source"]));
+        int? resizedWidth = Utils.optionalInt(markerPayload
+            .scopeManager.dataContext
+            .eval(template.image!["resizedWidth"]));
+        int? resizedHeight = Utils.optionalInt(markerPayload
+            .scopeManager.dataContext
+            .eval(template.image!["resizedHeight"]));
         if (source != null) {
           if (markersCache[source] == null) {
-            var asset = await MapsUtils.fromAsset(context, source);
+            var asset = await MapsUtils.fromAsset(context, source,
+                resizedWidth: resizedWidth, resizedHeight: resizedHeight);
             if (asset != null) {
               markersCache[source] = asset;
             }

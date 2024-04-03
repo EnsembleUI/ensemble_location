@@ -32,8 +32,8 @@ class MapsUtils {
     return null;
   }
 
-  static Future<BitmapDescriptor?> fromAsset(
-      BuildContext context, String asset) async {
+  static Future<BitmapDescriptor?> fromAsset(BuildContext context, String asset,
+      {int? resizedWidth, int? resizedHeight}) async {
     /// assets load from URL uses actual pixels, which may appear smaller
     /// for device with high device pixel ratio.
     if (Utils.isUrl(asset)) {
@@ -44,7 +44,8 @@ class MapsUtils {
 
         if (!kIsWeb) {
           return _resizeImageWithDeviceRatio(
-              imageBytes, MediaQuery.of(context).devicePixelRatio);
+              imageBytes, MediaQuery.of(context).devicePixelRatio,
+              resizedWidth: resizedWidth, resizedHeight: resizedHeight);
         } else {
           // Web uses ratio 1.0, nothing to do here
           return BitmapDescriptor.fromBytes(imageBytes);
@@ -64,10 +65,16 @@ class MapsUtils {
 
   /// Images via URL uses actual pixels. We need to convert to device pixels
   static Future<BitmapDescriptor?> _resizeImageWithDeviceRatio(
-      Uint8List imageBytes, double devicePixelRatio) async {
+      Uint8List imageBytes, double devicePixelRatio,
+      {int? resizedWidth, int? resizedHeight}) async {
     final Codec imageCodec = await instantiateImageCodecWithSize(
         await ImmutableBuffer.fromUint8List(imageBytes),
         getTargetSize: (intrinsicWidth, intrinsicHeight) {
+      if (resizedWidth != null || resizedHeight != null) {
+        return TargetImageSize(
+            width: resizedWidth != null ? (resizedWidth * devicePixelRatio).toInt() : null,
+            height: resizedHeight != null ? (resizedHeight * devicePixelRatio).toInt() : null);
+      }
       return TargetImageSize(
           width: (intrinsicWidth * devicePixelRatio).toInt());
     });

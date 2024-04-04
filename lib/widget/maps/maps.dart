@@ -114,10 +114,12 @@ class EnsembleMapWidget extends StatefulWidget
             latLng: latLng,
             template: MarkerTemplate.build(
                 image: Utils.getMap(markerData['marker']?['image']),
-                widget: markerData['marker']?['widget']),
+                widget: markerData['marker']?['widget'],
+                icon: Utils.getMap(markerData['marker']?['icon'])),
             selectedTemplate: MarkerTemplate.build(
                 image: Utils.getMap(markerData['selectedMarker']?['image']),
-                widget: markerData['selectedMarker']?['widget']),
+                widget: markerData['selectedMarker']?['widget'],
+                icon: Utils.getMap(markerData['selectedMarker']?['icon'])),
             overlayTemplate: markerData['overlayWidget'],
             onMarkerTap: EnsembleAction.fromYaml(markerData['onMarkerTap'],
                 initiator: this),
@@ -255,11 +257,11 @@ class MarkerTemplate {
   MarkerTemplate._({this.image, this.icon, this.widget});
 
   final Map<String, dynamic>? image;
-  final String? icon;
+  final Map<String, dynamic>? icon;
   final dynamic widget;
 
   static MarkerTemplate? build(
-      {Map<String, dynamic>? image, String? icon, dynamic widget}) {
+      {Map<String, dynamic>? image, Map<String, dynamic>? icon, dynamic widget}) {
     if (image != null || icon != null || widget != null) {
       return MarkerTemplate._(image: image, icon: icon, widget: widget);
     }

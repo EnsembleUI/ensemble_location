@@ -12,7 +12,9 @@ import 'package:ensemble/layout/templated.dart';
 import 'package:ensemble/screen_controller.dart';
 import 'package:ensemble/util/debouncer.dart';
 import 'package:ensemble/util/utils.dart';
+import 'package:ensemble/widget/shape.dart';
 import 'package:ensemble_location/location_manager.dart';
+import 'package:ensemble_location/widget/maps/custom_marker_pin.dart';
 import 'package:ensemble_location/widget/maps/map_actions.dart';
 import 'package:ensemble_location/widget/maps/maps.dart';
 import 'package:ensemble_location/widget/maps/maps_overlay.dart';
@@ -429,16 +431,25 @@ class EnsembleMapState extends MapsActionableState
         return widget.toBitmapDescriptor(
             maxWidth: MAX_WIDTH, maxHeight: MAX_HEIGHT);
       }
+      // similarly icon doesn't work on HTML renderer
+      if (template.icon != null && !kIsWeb) {
+        var iconMap = markerPayload.scopeManager.dataContext.eval(template.icon)
+            as Map<String, dynamic>;
+        var iconModel = MapMarkerIconModel.from(iconMap);
+        if (iconModel != null) {
+          var approxPinWidth =
+              (iconModel.size ?? MapMarkerIconModel.defaultSize) +
+                  (iconModel.padding + iconModel.iconPadding) * 2;
+          return CustomMarkerPin(iconModel).toBitmapDescriptor(
+              maxWidth: approxPinWidth, maxHeight: approxPinWidth * 2);
+        }
+      }
       if (template.image != null) {
-        String? source = Utils.optionalString(markerPayload
-            .scopeManager.dataContext
-            .eval(template.image!["source"]));
-        int? resizedWidth = Utils.optionalInt(markerPayload
-            .scopeManager.dataContext
-            .eval(template.image!["resizedWidth"]));
-        int? resizedHeight = Utils.optionalInt(markerPayload
-            .scopeManager.dataContext
-            .eval(template.image!["resizedHeight"]));
+        var imageMap =
+            markerPayload.scopeManager.dataContext.eval(template.image);
+        String? source = Utils.optionalString(imageMap["source"]);
+        int? resizedWidth = Utils.optionalInt(imageMap["resizedWidth"]);
+        int? resizedHeight = Utils.optionalInt(imageMap["resizedHeight"]);
         if (source != null) {
           if (markersCache[source] == null) {
             var asset = await MapsUtils.fromAsset(context, source,
@@ -450,7 +461,6 @@ class EnsembleMapState extends MapsActionableState
           return markersCache[source];
         }
       }
-      // TODO: from icon
     }
     return null;
   }
